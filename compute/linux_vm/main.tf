@@ -26,7 +26,7 @@ resource azurerm_public_ip address {
   location            = var.rg_location
   allocation_method   = "Static"
   ip_version          = "IPv4"
-  zones               = [var.zone]
+  availability_zone   = var.zone
   sku                 = "Standard"
 
   tags = {

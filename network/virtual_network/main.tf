@@ -32,95 +32,95 @@ resource azurerm_network_security_group network_sg {
   location            = var.rg_location
   resource_group_name = var.rg_name
 
-  security_rule {
-    name                       = "tcp-in-ssh"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  security_rule {
-    name                       = "tcp-in-http"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  security_rule {
-    name                       = "tcp-in-https"
-    priority                   = 120
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  security_rule {
-    name                       = "tcp-in-kube-nodeports"
-    priority                   = 130
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "30000-32500"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  security_rule {
-    name                       = "tcp-in-kube-alt-port-1"
-    priority                   = 140
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "4443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  security_rule {
-    name                       = "tcp-in-kube-metrics-port"
-    priority                   = 150
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "10250"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+#  security_rule {
+#    name                       = "tcp-in-ssh"
+#    priority                   = 100
+#    direction                  = "Inbound"
+#    access                     = "Allow"
+#    protocol                   = "Tcp"
+#    source_port_range          = "*"
+#    destination_port_range     = "22"
+#    source_address_prefix      = "*"
+#    destination_address_prefix = "*"
+#  }
+#  security_rule {
+#    name                       = "tcp-in-http"
+#    priority                   = 110
+#    direction                  = "Inbound"
+#    access                     = "Allow"
+#    protocol                   = "Tcp"
+#    source_port_range          = "*"
+#    destination_port_range     = "80"
+#    source_address_prefix      = "*"
+#    destination_address_prefix = "*"
+#  }
+#  security_rule {
+#    name                       = "tcp-in-https"
+#    priority                   = 120
+#    direction                  = "Inbound"
+#    access                     = "Allow"
+#    protocol                   = "Tcp"
+#    source_port_range          = "*"
+#    destination_port_range     = "443"
+#    source_address_prefix      = "*"
+#    destination_address_prefix = "*"
+#  }
+#  security_rule {
+#    name                       = "tcp-in-kube-nodeports"
+#    priority                   = 130
+#    direction                  = "Inbound"
+#    access                     = "Allow"
+#    protocol                   = "Tcp"
+#    source_port_range          = "*"
+#    destination_port_range     = "30000-32500"
+#    source_address_prefix      = "*"
+#    destination_address_prefix = "*"
+#  }
+#  security_rule {
+#    name                       = "tcp-in-kube-alt-port-1"
+#    priority                   = 140
+#    direction                  = "Inbound"
+#    access                     = "Allow"
+#    protocol                   = "Tcp"
+#    source_port_range          = "*"
+#    destination_port_range     = "4443"
+#    source_address_prefix      = "*"
+#    destination_address_prefix = "*"
+#  }
+#  security_rule {
+#    name                       = "tcp-in-kube-metrics-port"
+#    priority                   = 150
+#    direction                  = "Inbound"
+#    access                     = "Allow"
+#    protocol                   = "Tcp"
+#    source_port_range          = "*"
+#    destination_port_range     = "10250"
+#    source_address_prefix      = "*"
+#    destination_address_prefix = "*"
+#  }
 
   security_rule {
-    name                       = "tcp-out-http"
+    name                       = "vnet-allow"
     priority                   = 200
     direction                  = "Outbound"
     access                     = "Allow"
-    protocol                   = "Tcp"
+    protocol                   = "*"
     source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "VirtualNetwork"
   }
 
   security_rule {
-    name                       = "tcp-out-https"
+    name                       = "internet-deny"
     priority                   = 210
     direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
+    access                     = "Deny"
+    protocol                   = "*"
     source_port_range          = "*"
-    destination_port_range     = "443"
+    destination_port_range     = "*"
     source_address_prefix      = "*"
-    destination_address_prefix = "*"
+    destination_address_prefix = "Internet"
   }
 
   tags = {
@@ -155,4 +155,23 @@ resource azurerm_private_dns_zone_virtual_network_link reverse_link {
   resource_group_name   = var.rg_name
   virtual_network_id    = azurerm_virtual_network.net.id
   private_dns_zone_name = azurerm_private_dns_zone.reverse.name
+}
+
+resource azurerm_route_table private_route_table {
+  location            = var.rg_location
+  resource_group_name = var.rg_name
+  name                = "private-route-table"
+}
+
+resource azurerm_route local {
+  name                = "private-route"
+  resource_group_name = var.rg_name
+  route_table_name    = azurerm_route_table.private_route_table.name
+  address_prefix      = var.cidr_block
+  next_hop_type       = "VNetLocal"
+}
+
+resource azurerm_subnet_route_table_association private_net {
+  subnet_id      = azurerm_subnet.subnet_1.id
+  route_table_id = azurerm_route_table.private_route_table.id
 }
